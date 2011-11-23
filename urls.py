@@ -1,5 +1,5 @@
 from django.conf.urls.defaults import *
-from traffic.views import index, start_map, test_page
+from traffic.views import index, start_map
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
@@ -8,7 +8,6 @@ admin.autodiscover()
 urlpatterns = patterns('',
         ('^$', index),
         ('^traffic/in/(johannesburg||cape town||pretoria)$', start_map),
-        ('^test/(.*)$', test_page),
         # Example:
     # (r'^traffic/', include('traffic.foo.urls')),
 

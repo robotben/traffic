@@ -14,22 +14,36 @@
   var directionsDisplay = new google.maps.DirectionsRenderer(rendererOptions);;
   var directionsService = new google.maps.DirectionsService();
   var map;
-  var geocoder = new google.maps.Geocoder();
-
+  var infowindow = null;
+  
   function initialize() {
-    alert("{{ latnlng }}");
-    var starting_location = new google.maps.LatLng{{ latlng }};
     var myOptions = {
       zoom: 12,
       mapTypeId: google.maps.MapTypeId.ROADMAP,
-      center: starting_location
+      center: new google.maps.LatLng{{ camera_locations.0.city_latlng }}
     };
     map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
 
-    var contentString = 'this is some info';
+//    {% for i in camera_locations %}
+//     var {{ i.replace_address_spaces }}_content = "{{ i.address }}";
+//      var {{ i.replace_address_spaces }}_infowindow = new google.maps.InfoWindow({
+//        content: {{ i.replace_address_spaces }}_content
+//      });
+//      
+//      var {{ i.replace_address_spaces }}_position = new google.maps.LatLng{{ i.cam_latlng }};
+//      
+//      var marker = new google.maps.Marker({
+//        position: {{ i.replace_address_spaces }}_position,
+//       map: map,
+//        title: "{{ i.address }}"
+//        });
+//    {% endfor %}
 
-    var infowindow = new google.maps.InfoWindow({
-      content: contentString
+    setMarkers(map);    
+//    setZoom(map, camera_locations);
+
+    infowindow = new google.maps.InfoWindow({
+      content: "Loading..."
     });
 
     directionsDisplay.setMap(map);
@@ -40,6 +54,37 @@
     });
     
   }
+
+/*
+   This functions sets the markers (array)
+*/
+function setMarkers(map) {
+  {% for i in camera_locations %}
+    var cam_latlng = new google.maps.LatLng{{ i.cam_latlng }};
+
+    var marker = new google.maps.Marker({
+      position: cam_latlng,
+      map: map,
+      title: '{{ i.address }}',
+      html: '{{ i.address }}',
+      // Markers drop on the map
+      animation: google.maps.Animation.DROP
+    });
+    google.maps.event.addListener(marker, "click", function () {
+      infowindow.setContent(this.html);
+      infowindow.open(map, this);
+    });
+  {% endfor %}
+}
+
+function setZoom(map, markers) {
+  var boundbox = new google.maps.LatLngBounds();
+    for ( var i = 0; i < markers.length; i++ ){
+      boundbox.extend(new google.maps.LatLng(markers[i][1], markers[i][2]));
+    }
+    map.setCenter(boundbox.getCenter());
+    map.fitBounds(boundbox);
+}
 
 function calcRoute() { 
     var origin = document.getElementById("origin").value;
